@@ -3,3 +3,4 @@ config/settings.yml
 .idea
 logs
 *swp
+Gemfile.lock
