@@ -101,9 +101,9 @@ module Proxy::PuppetCA
       default_path = ["/usr/sbin","/opt/puppet/bin", "/usr/bin"]
 
       if Puppet::PUPPETVERSION.to_i < 3
-	@puppetca = which("puppetca", default_path) || which("puppet", default_path)
+        @puppetca = which("puppetca", default_path) || which("puppet", default_path)
       else
-	@puppetca = which("puppet", default_path)
+      	@puppetca = which("puppet", default_path)
       end
 
       unless File.exists?("#{@puppetca}")
