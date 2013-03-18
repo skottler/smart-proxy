@@ -12,9 +12,11 @@ module Proxy
   require "proxy/tftp"     if SETTINGS.tftp
   require "proxy/puppetca" if SETTINGS.puppetca
   require "proxy/puppet"   if SETTINGS.puppet
-  require "proxy/dns"      if SETTINGS.dns
-  require "proxy/dhcp"     if SETTINGS.dhcp
-  require "proxy/bmc"      if SETTINGS.bmc
+
+  # These pieces of the proxy have been abstracted out.
+  require "foreman-proxy-dns"      if (SETTINGS.dns && Proxy::Util.proxy_gem_installed?('dns'))
+  require "foreman-proxy-dhcp"     if (SETTINGS.dhcp && Proxy::Util.proxy_gem_installed?('dhcp'))
+  require "foreman-proxy-bmc"      if (SETTINGS.bmc && Proxy::Util.proxy_gem_installed?('bmc'))
 
   def self.features
     MODULES.collect{|mod| mod if SETTINGS.send mod}.compact

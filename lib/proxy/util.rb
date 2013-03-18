@@ -80,4 +80,13 @@ module Proxy::Util
       Shellwords.escape(command)
     end
   end
+
+  def self.proxy_gem_installed?(name)
+    gem = "foreman-proxy-#{name}"
+    Gem::Specification.find_by_name(gem)
+  rescue Gem::LoadError
+      false
+  rescue
+      Gem.available?(gem)
+  end
 end
