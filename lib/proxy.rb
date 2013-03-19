@@ -1,5 +1,6 @@
 module Proxy
   MODULES = %w{dns dhcp tftp puppetca puppet bmc}
+  GEMS = %W{dns dhcp bmc}
   VERSION = "1.1"
 
   require "checks"
@@ -14,9 +15,9 @@ module Proxy
   require "proxy/puppet"   if SETTINGS.puppet
 
   # These pieces of the proxy have been abstracted out.
-  require "foreman-proxy-dns"      if (SETTINGS.dns && Proxy::Util.proxy_gem_installed?('dns'))
-  require "foreman-proxy-dhcp"     if (SETTINGS.dhcp && Proxy::Util.proxy_gem_installed?('dhcp'))
-  require "foreman-proxy-bmc"      if (SETTINGS.bmc && Proxy::Util.proxy_gem_installed?('bmc'))
+  GEMS.each do |gem|
+    require "foreman-proxy-#{gem}" if SETTINGS.gem && Proxy::Util.proxy_gem_installed?(gem)
+  end
 
   def self.features
     MODULES.collect{|mod| mod if SETTINGS.send mod}.compact
