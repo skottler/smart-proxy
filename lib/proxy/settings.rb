@@ -7,7 +7,7 @@ require 'proxy/dns/default_dns_settings'
 require 'proxy/puppet/default_puppet_settings'
 
 class Settings < OpenStruct
-  DEFAULTS = [Proxy::DNS::DefaultSettings::DEFAULTS, Proxy::Puppet::DefaultSettings::DEFAULTS].inject({}) do |all, current|
+  DEFAULTS = [Proxy::DNS::DefaultSettings::DEFAULTS, Proxy::Puppet::DefaultSettings::DEFAULTS, Proxy::MCollective::DefaultSettings::DEFAULTS].inject({}) do |all, current|
     all.merge!(current)
   end
 
