@@ -92,6 +92,9 @@
 :bmc: false
 #:bmc_default_provider: freeipmi
 
+# enable remote management using MCollective for packages and services
+:mcollective: false
+
 # Where our proxy log files are stored
 # filename or STDOUT
 :log_file: /var/log/foreman-proxy/proxy.log
