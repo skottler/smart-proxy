@@ -1,7 +1,7 @@
 class SmartProxy
   post "/mcollective/package/:name" do
     begin
-      Proxy::MCollective.install(params[:name])
+      Proxy::MCollective::Package.new.install(params[:name])
     rescue Exception => e
       log_halt 400, e
     end
@@ -9,18 +9,41 @@ class SmartProxy
 
   delete "/mcollective/package/:name" do
     begin
-      Proxy::MCollective.uninstall(params[:name])
+      Proxy::MCollective::Package.new.uninstall(params[:name])
     rescue Exception => e
       log_halt 400, e
     end
   end
 
-  # TODO: figure out how to make service management more RESTful
-  post "/mcollective/service/:name" do
-    raise NotImplementedError.new
+  get "/mcollective/service/:name" do
+    begin
+      Proxy::MCollective::Service.new.status(params[:name])
+    rescue Exception => e
+      log_halt 400, e
+    end
   end
 
-  delete "/mcollective/service/:name" do
-    raise NotImplementedError.new
+  post "/mcollective/service/:name/start" do
+    begin
+      Proxy::MCollective::Service.new.start(params[:name])
+    rescue Exception => e
+      log_halt 400, e
+    end
+  end
+
+  post "/mcollective/service/:name/stop" do
+    begin
+      Proxy::MCollective::Service.new.stop(params[:name])
+    rescue Exception => e
+      log_halt 400, e
+    end
+  end
+
+  get "/mcollective/ping" do
+    begin
+      Proxy::MCollective::Util.new.ping()
+    rescue Exception => e
+      log_halt 400, e
+    end
   end
 end
