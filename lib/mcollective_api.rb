@@ -1,5 +1,5 @@
 class SmartProxy
-  post "/mcollective/package/:name" do
+  post "/mcollective/packages/:name" do
     begin
       Proxy::MCollective::Package.new.install(params[:name])
     rescue Exception => e
@@ -7,7 +7,7 @@ class SmartProxy
     end
   end
 
-  delete "/mcollective/package/:name" do
+  delete "/mcollective/packages/:name" do
     begin
       Proxy::MCollective::Package.new.uninstall(params[:name])
     rescue Exception => e
@@ -15,7 +15,7 @@ class SmartProxy
     end
   end
 
-  get "/mcollective/service/:name" do
+  get "/mcollective/services/:name" do
     begin
       Proxy::MCollective::Service.new.status(params[:name])
     rescue Exception => e
@@ -23,7 +23,7 @@ class SmartProxy
     end
   end
 
-  post "/mcollective/service/:name/start" do
+  post "/mcollective/services/:name/start" do
     begin
       Proxy::MCollective::Service.new.start(params[:name])
     rescue Exception => e
@@ -31,7 +31,7 @@ class SmartProxy
     end
   end
 
-  post "/mcollective/service/:name/stop" do
+  post "/mcollective/services/:name/stop" do
     begin
       Proxy::MCollective::Service.new.stop(params[:name])
     rescue Exception => e
