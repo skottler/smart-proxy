@@ -1,3 +1,4 @@
+require 'mcollective'
 require 'proxy/log'
 
 module Proxy::Mcollective
