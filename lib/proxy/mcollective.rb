@@ -1,7 +1,7 @@
 require 'mcollective'
 require 'proxy/log'
 
-module Proxy::Mcollective
+module Proxy::MCollective
   class RPCClientBase
     include MCollective::RPC
     extend Proxy::Log
