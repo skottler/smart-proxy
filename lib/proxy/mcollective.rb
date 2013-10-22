@@ -1,61 +1,86 @@
+#
+# to start sidekiq: sidekiq -r ./lib/proxy/mcollective.rb -L logs/sidekiq.log
+#
 require 'mcollective'
-require 'proxy/log'
+#require 'proxy/log'
+require 'sidekiq'
 
-module Proxy::MCollective
-  class RPCClientBase
-    include MCollective::RPC
-    extend Proxy::Log
-    extend Proxy::Util
+module Proxy
+  module MCollective
+    
+    class RPCClientBase
+      include ::MCollective::RPC
+      include ::Sidekiq::Worker
+      #extend ::Proxy::Log
+      #extend Proxy::Util
 
-    def client(aname)
-      @client ||= rpcclient(aname) { |c| c.progress = false; c }
+      def client(aname)
+        @client ||= rpcclient(aname) { |c| c.progress = false; c }
+      end
+
+      def disconnect
+        client.disconnect unless @client == nil
+      end
     end
 
-    def disconnect
-      client.disconnect unless @client == nil
-    end
-  end
-
-  class Package < RPCClientBase
-    def client
-      super("package")
-    end
-
-    def install(package)
-      client.install(:package => package)
+    module Test
+      class TestCommand
+        include ::Sidekiq::Worker
+        
+        def perform(payload)
+          logger.info("!!!!!!!!!!!!!!!!! #{payload}")
+        end
+      end
     end
 
-    def uninstall(package)
-      client.uninstall(:package => package)
+    module Package
+      class Install < RPCClientBase
+        def client
+          super("package")
+        end
+
+        def perform(package)
+          client.install(:package => package)
+        end
+      end
+    
+      class Uninstall < RPCClientBase
+        def client
+          super("package")
+        end
+
+        def perform(package)
+          client.uninstall(:package => package)
+        end
+      end
     end
 
-  end
+    module Service
+      def client
+        super("service")
+      end
 
-  class Service < RPCClientBase
-    def client
-      super("service")
+      def status(aservice)
+        @client.status(:service => aservice)
+      end
+
+      def start(aservice)
+        @client.start(:service => aservice)
+      end
+
+      def stop(aservice)
+        @client.stop(:service => aservice)
+      end
     end
 
-    def status(aservice)
-      @client.status(:service => aservice)
-    end
+    class Util < RPCClientBase
+      def client
+        super("rpcutil")
+      end
 
-    def start(aservice)
-      @client.start(:service => aservice)
-    end
-
-    def stop(aservice)
-      @client.stop(:service => aservice)
-    end
-  end
-
-  class Util < RPCClientBase
-    def client
-      super("rpcutil")
-    end
-
-    def ping
-      client.ping
+      def ping
+        client.ping
+      end
     end
   end
 end
