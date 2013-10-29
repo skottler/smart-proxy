@@ -5,7 +5,10 @@ class SmartProxy
 
   post "/mcollective/agents" do
     begin
-      Sidekiq::Client.push('class' => 'Proxy::MCollective::Agents::List', 'args' => [''])
+      jid = Sidekiq::Client.push('class' => 'Proxy::MCollective::Agent::List', 'args' => [])
+      status 202
+      content_type :text
+      body "/tasks/#{jid}"
     rescue Exception => e
       log_halt 400, e
     end

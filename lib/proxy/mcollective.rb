@@ -4,23 +4,31 @@
 # to check status: curl -X GET http://localhost:8443/tasks/94b356ad3934a5b6ab0f7caa (use url returned from the previous command)
 #
 require 'mcollective'
-#require 'proxy/log'
 require 'sidekiq'
 
 module Proxy
   class Trackable
     include ::Sidekiq::Worker
+    include ::MCollective::RPC
 
     STARTED = "started"
     FINISHED = "finished"
     FAILED = "failed"
     RETRYING = "retrying"
 
+    def client(name)
+      @client ||= rpcclient(name) { |c| c.progress = false; c }
+    end
+
+    def disconnect
+      client.disconnect if @client
+    end
+
     def save_state(state, result = {})
       Sidekiq.redis {|conn| conn.set("job:#{jid}", {'state' => state, 'result' => result}.to_json)}
     end
 
-    def perform(payload)
+    def perform(payload='')
       save_state(STARTED)
 
       result = do_stuff(payload)
@@ -37,40 +45,22 @@ module Proxy
   end
 
   module MCollective
-    class RPCClientBase
-      include ::MCollective::RPC
+    include ::MCollective::RPC
 
-      def client(aname)
-        @client ||= rpcclient(aname) { |c| c.progress = false; c }
-      end
-
-      def disconnect
-        client.disconnect unless @client == nil
-      end
-    end
-
-    module Test
-      class TestCommand < ::Proxy::Trackable
-        def do_stuff(payload)
-          "!!!!!!!!!!!!!!!!! #{payload}"
-        end
-      end
-    end
-
-    module Agents
-      class List < RPCClientBase
+    module Agent
+      class List < ::Proxy::Trackable
         def client
           super("rpcutil")
         end
 
-        def perform
-          client.agent_inventory
+        def do_stuff(payload)
+          client.agent_inventory()
         end
       end
     end
 
     module Package
-      class Install < RPCClientBase
+      class Install < ::Proxy::Trackable
         def client
           super("package")
         end
@@ -80,7 +70,7 @@ module Proxy
         end
       end
 
-      class Uninstall < RPCClientBase
+      class Uninstall < ::Proxy::Trackable
         def client
           super("package")
         end
@@ -109,7 +99,7 @@ module Proxy
       end
     end
 
-    class Util < RPCClientBase
+    class Util < ::Proxy::Trackable
       def client
         super("rpcutil")
       end
