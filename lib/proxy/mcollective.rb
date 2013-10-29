@@ -33,14 +33,12 @@ module Proxy
 
     sidekiq_retries_exhausted do |msg|
       save_state(FAILED, msg['error_message'])
-    end    
+    end
   end
 
   module MCollective
-    class RPCClientBase 
+    class RPCClientBase
       include ::MCollective::RPC
-      #extend ::Proxy::Log
-      #extend Proxy::Util
 
       def client(aname)
         @client ||= rpcclient(aname) { |c| c.progress = false; c }
@@ -53,9 +51,20 @@ module Proxy
 
     module Test
       class TestCommand < ::Proxy::Trackable
-                
         def do_stuff(payload)
           "!!!!!!!!!!!!!!!!! #{payload}"
+        end
+      end
+    end
+
+    module Agents
+      class List < RPCClientBase
+        def client
+          super("rpcutil")
+        end
+
+        def perform
+          client.agent_inventory
         end
       end
     end
@@ -70,7 +79,7 @@ module Proxy
           client.install(:package => package)
         end
       end
-    
+
       class Uninstall < RPCClientBase
         def client
           super("package")
