@@ -5,6 +5,7 @@
 #
 require 'mcollective'
 require 'sidekiq'
+require 'connection_pool'
 
 module Proxy
   class Trackable
@@ -16,8 +17,17 @@ module Proxy
     FAILED = "failed"
     RETRYING = "retrying"
 
+    # Create a connection pool that's n + 1 where n is the number of workers.
+    def pool(name)
+      ConnectionPool.new(:size => 25, :timeout => 2) {
+        rpcclient(name) { |c| c.progress = false; c }
+      }
+    end
+
     def client(name)
-      @client ||= rpcclient(name) { |c| c.progress = false; c }
+      pool(name).with do |rpc|
+        return rpc
+      end
     end
 
     def disconnect

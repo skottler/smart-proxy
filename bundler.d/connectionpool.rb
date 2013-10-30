@@ -1,0 +1,1 @@
+gem 'connection_pool'
