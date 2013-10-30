@@ -1,6 +1,6 @@
 #
-# to start sidekiq: sidekiq -r ./lib/proxy/mcollective.rb -L logs/sidekiq.log
-# to kick off an async job: curl -X POST -d {} http://localhost:8443/mcollective/test/blahblah
+# to start sidekiq: sidekiq -r ./lib/proxy/mcollective.rb -C config/sidekiq.yml -L logs/sidekiq.log
+# to kick off an async job: curl -X POST -d {} http://localhost:8443/mcollective/<endpoint>
 # to check status: curl -X GET http://localhost:8443/tasks/94b356ad3934a5b6ab0f7caa (use url returned from the previous command)
 #
 require 'mcollective'
