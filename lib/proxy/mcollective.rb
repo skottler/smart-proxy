@@ -6,16 +6,25 @@
 require 'mcollective'
 require 'sidekiq'
 require 'connection_pool'
+require 'rest_client'
 
 module Proxy
-  class Trackable
+  module ForemanCallbacks
+    CONNECT_PARAMS = {:timeout => 60, :open_timeout => 10}
+    
+    def rest_client
+      ::RestClient::Resource.new("http://localhost:3000/", CONNECT_PARAMS)
+    end
+
+    def task_status_callback(status, result)
+      rest_client["command_statuses/#{jid}"].put({:command_status => {:status => status, :result => result}}.to_json, :content_type => 'application/json', :accept => 'application/json;version=2')
+    end
+  end
+
+  class BaseAsyncWorker
     include ::Sidekiq::Worker
     include ::MCollective::RPC
-
-    STARTED = "started"
-    FINISHED = "finished"
-    FAILED = "failed"
-    RETRYING = "retrying"
+    include ::Proxy::ForemanCallbacks
 
     # Create a connection pool that's n + 1 where n is the number of workers.
     def pool(name)
@@ -34,31 +43,29 @@ module Proxy
       client.disconnect if @client
     end
 
-    def save_state(state, result = {})
-      Sidekiq.redis {|conn| conn.set("job:#{jid}", {'state' => state, 'result' => result}.to_json)}
-    end
-
     def perform(payload='')
-      save_state(STARTED)
-
       result = do_stuff(payload)
-
-      save_state(FINISHED, result.to_json)
-    rescue Exception => e
-      save_state(RETRYING, e.message)
-      raise e
+      task_status_callback("success", result)
     end
 
     sidekiq_retries_exhausted do |msg|
-      save_state(FAILED, msg['error_message'])
+      task_status_callback("failure", :error => msg['error_message'])
     end
   end
 
   module MCollective
     include ::MCollective::RPC
 
+    module Test
+      class Blah < ::Proxy::BaseAsyncWorker
+        def do_stuff(payload)
+          "echo #{payload}"
+        end
+      end
+    end
+
     module Agent
-      class List < ::Proxy::Trackable
+      class List < ::Proxy::BaseAsyncWorker
         def client
           super("rpcutil")
         end
@@ -70,7 +77,7 @@ module Proxy
     end
 
     module Package
-      class Install < ::Proxy::Trackable
+      class Install < ::Proxy::BaseAsyncWorker
         def client
           super("package")
         end
@@ -80,7 +87,7 @@ module Proxy
         end
       end
 
-      class Uninstall < ::Proxy::Trackable
+      class Uninstall < ::Proxy::BaseAsyncWorker
         def client
           super("package")
         end
@@ -109,7 +116,7 @@ module Proxy
       end
     end
 
-    class Util < ::Proxy::Trackable
+    class Util < ::Proxy::BaseAsyncWorker
       def client
         super("rpcutil")
       end

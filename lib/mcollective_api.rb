@@ -16,10 +16,10 @@ class SmartProxy
 
   post "/mcollective/test/:name" do
     begin
-      jid = Sidekiq::Client.push('class' => 'Proxy::MCollective::Test::TestCommand', 'args' => [params[:name]])
+      jid = Sidekiq::Client.push('class' => 'Proxy::MCollective::Test::Blah', 'args' => [params[:name]])
       status 202
       content_type :text
-      body "/tasks/#{jid}"
+      body "#{jid}"
     rescue Exception => e
       log_halt 400, e
     end

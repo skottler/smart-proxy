@@ -33,7 +33,6 @@ class SmartProxy < Sinatra::Base
   require "dhcp_api"        if SETTINGS.dhcp
   require "dns_api"         if SETTINGS.dns
   require "mcollective_api" if SETTINGS.mcollective
-  require "async_task_status_api" if SETTINGS.mcollective
   require "puppet_api"      if SETTINGS.puppet
   require "puppetca_api"    if SETTINGS.puppetca
   require "tftp_api"        if SETTINGS.tftp
