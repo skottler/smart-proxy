@@ -1,0 +1,3 @@
+#!/bin/sh
+
+sidekiq -r ./lib/proxy/mcollective.rb -C config/sidekiq.yml

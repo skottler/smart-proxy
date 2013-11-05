@@ -3,6 +3,10 @@
 # to kick off an async job: curl -X POST -d {} http://localhost:8443/mcollective/<endpoint>
 # to check status: curl -X GET http://localhost:8443/tasks/94b356ad3934a5b6ab0f7caa (use url returned from the previous command)
 #
+
+$LOAD_PATH.unshift *Dir["#{File.dirname(__FILE__)}/../../lib"]
+
+require "proxy/settings"
 require 'mcollective'
 require 'sidekiq'
 require 'connection_pool'
@@ -10,10 +14,13 @@ require 'rest_client'
 
 module Proxy
   module ForemanCallbacks
+    SETTINGS = Settings.load_from_file(Pathname.new(__FILE__).join("..", "..", "..", "config", "settings.yml"))
+
     CONNECT_PARAMS = {:timeout => 60, :open_timeout => 10}
-    
+    CONNECT_PARAMS.merge!(:user => SETTINGS.mco_user, :password => SETTINGS.mco_password) if SETTINGS.mco_user && SETTINGS.mco_password
+
     def rest_client
-      ::RestClient::Resource.new("http://localhost:3000/", CONNECT_PARAMS)
+      ::RestClient::Resource.new(SETTINGS.mco_callback_url, CONNECT_PARAMS)
     end
 
     def task_status_callback(status, result)
