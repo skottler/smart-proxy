@@ -89,7 +89,7 @@ module Proxy
           super("package")
         end
 
-        def perform(package)
+        def do_stuff(package)
           client.install(:package => package)
         end
       end
@@ -99,37 +99,53 @@ module Proxy
           super("package")
         end
 
-        def perform(package)
+        def do_stuff(package)
           client.uninstall(:package => package)
         end
       end
     end
 
     module Service
-      def client
-        super("service")
+      class Status < ::Proxy::BaseAsyncWorker
+        def client
+          super("service")
+        end
+
+        def do_stuff(service)
+          client.status(:service => service)
+        end
       end
 
-      def status(aservice)
-        @client.status(:service => aservice)
+      class Start < ::Proxy::BaseAsyncWorker
+        def client
+          super("service")
+        end
+
+        def do_stuff(service)
+          client.start(:service => service)
+        end
       end
 
-      def start(aservice)
-        @client.start(:service => aservice)
-      end
+      class Stop < ::Proxy::BaseAsyncWorker
+        def client
+          super("service")
+        end
 
-      def stop(aservice)
-        @client.stop(:service => aservice)
+        def do_stuff(service)
+          client.stop(:service => service)
+        end
       end
     end
 
-    class Util < ::Proxy::BaseAsyncWorker
-      def client
-        super("rpcutil")
-      end
+    module Util
+      class Ping < ::Proxy::BaseAsyncWorker
+        def client
+          super("rpcutil")
+        end
 
-      def ping
-        client.ping
+        def do_stuff(empty)
+          client.ping
+        end
       end
     end
   end
