@@ -33,6 +33,10 @@ module Proxy
     include ::MCollective::RPC
     include ::Proxy::ForemanCallbacks
 
+    class << self
+      attr_accessor :on_perform_blk
+    end
+
     # Create a connection pool that's n + 1 where n is the number of workers.
     def pool(name)
       ConnectionPool.new(:size => 25, :timeout => 2) {
@@ -50,9 +54,36 @@ module Proxy
       client.disconnect if @client
     end
 
-    def perform(payload='')
-      result = do_stuff(payload)
+    def perform(payload='', filters = [])
+      c = client
+      filters.each do |f|
+        unless (cmd = hash_to_filter(f)).empty?
+          client.send(*cmd)
+        end
+      end
+
+      result = self.class.on_perform_blk.call(c, payload) unless self.class.on_perform_blk == nil
+
       task_status_callback("success", result)
+    ensure
+      c.reset_filter
+    end
+
+    def hash_to_filter(f_hash)
+      case f_hash.keys.first
+      when 'identity'
+        [:identity_filter, f_hash.values.first]
+      when 'class'
+        [:class_filter, f_hash.values.first]
+      when 'fact'
+        [:fact_filter, f_hash.values.first]
+      else
+        # support for agent_filter and compound_filter
+      end
+    end
+
+    def self.on_perform(&blk)
+      self.on_perform_blk = blk
     end
 
     sidekiq_retries_exhausted do |msg|
@@ -63,21 +94,13 @@ module Proxy
   module MCollective
     include ::MCollective::RPC
 
-    module Test
-      class Blah < ::Proxy::BaseAsyncWorker
-        def do_stuff(payload)
-          "echo #{payload}"
-        end
-      end
-    end
-
     module Agent
       class List < ::Proxy::BaseAsyncWorker
         def client
           super("rpcutil")
         end
 
-        def do_stuff(payload)
+        on_perform do |client, payload|
           client.agent_inventory()
         end
       end
@@ -89,7 +112,7 @@ module Proxy
           super("package")
         end
 
-        def do_stuff(package)
+        on_perform do |client, package|
           client.install(:package => package)
         end
       end
@@ -99,7 +122,7 @@ module Proxy
           super("package")
         end
 
-        def do_stuff(package)
+        on_perform do |client, package|
           client.uninstall(:package => package)
         end
       end
@@ -111,7 +134,7 @@ module Proxy
           super("service")
         end
 
-        def do_stuff(service)
+        on_perform do |client, service|
           client.status(:service => service)
         end
       end
@@ -121,7 +144,7 @@ module Proxy
           super("service")
         end
 
-        def do_stuff(service)
+        on_perform do |client, service|
           client.start(:service => service)
         end
       end
@@ -131,7 +154,7 @@ module Proxy
           super("service")
         end
 
-        def do_stuff(service)
+        on_perform do |client, service|
           client.stop(:service => service)
         end
       end
@@ -143,7 +166,7 @@ module Proxy
           super("rpcutil")
         end
 
-        def do_stuff(empty)
+        on_perform do |client, notused|
           client.ping
         end
       end
