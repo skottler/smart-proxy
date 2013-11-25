@@ -58,7 +58,7 @@ module Proxy
       c = client
       filters.each do |f|
         unless (cmd = hash_to_filter(f)).empty?
-          client.send(*cmd)
+          c.send(*cmd)
         end
       end
 
