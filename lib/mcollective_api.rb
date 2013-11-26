@@ -14,17 +14,6 @@ class SmartProxy
     end
   end
 
-  post "/mcollective/test/:name" do
-    begin
-      jid = Sidekiq::Client.push('class' => 'Proxy::MCollective::Test::Blah', 'args' => [params[:name], JSON.parse(params[:filters])])
-      status 202
-      content_type :text
-      body "#{jid}"
-    rescue Exception => e
-      log_halt 400, e
-    end
-  end
-
   post "/mcollective/packages/:name" do
     begin
       Sidekiq::Client.push('class' => 'Proxy::MCollective::Package::Install', 'args' => [params[:name], JSON.parse(params[:filters])])
