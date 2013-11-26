@@ -1,4 +1,4 @@
-# Rack configuration for the sidekiq web UI. It'll be listening on port 3000.
+# Rack configuration for the sidekiq web UI. It'll be listening on port 9292.
 #
 # Run `bundle exec rackup extra/sidekiq.ru` to start the app.
 #
