@@ -95,6 +95,10 @@
 # enable remote management using MCollective for packages and services
 :mcollective: false
 
+# set this to the URL of your foreman installation so async alerts can be
+# sent to the web UI.
+:mcollective_callback_url: http://example.com
+
 # Where our proxy log files are stored
 # filename or STDOUT
 :log_file: /var/log/foreman-proxy/proxy.log

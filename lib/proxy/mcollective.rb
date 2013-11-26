@@ -20,7 +20,7 @@ module Proxy
     CONNECT_PARAMS.merge!(:user => SETTINGS.mco_user, :password => SETTINGS.mco_password) if SETTINGS.mco_user && SETTINGS.mco_password
 
     def rest_client
-      ::RestClient::Resource.new(SETTINGS.mco_callback_url, CONNECT_PARAMS)
+      ::RestClient::Resource.new(SETTINGS.mcollective_callback_url, CONNECT_PARAMS)
     end
 
     def task_status_callback(status, result)
