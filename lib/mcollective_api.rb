@@ -25,9 +25,8 @@ class SmartProxy
   end
 
   post "/mcollective/agents/:name/fields" do
-    enqueue_job('Proxy::MCollective::Agent::Fields')
+    enqueue_job('Proxy::MCollective::Agent::Fields', [params[:name]])
   end
-
 
   post "/mcollective/packages/:name" do
     enqueue_job('Proxy::MCollective::Package::Install')

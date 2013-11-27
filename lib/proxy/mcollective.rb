@@ -101,10 +101,9 @@ module Proxy
         end
 
         on_perform do |client, payload|
-          agents = []
           client.agent_inventory.each do |agent|
             agent[:data][:agents].each do |item|
-              agents << item[:agent]
+              (agents ||= []) << item[:agent]
             end
           end
           agents.uniq
@@ -121,7 +120,7 @@ module Proxy
         end
 
         on_perform do |client, payload|
-          client.self()
+          client.inspect()
         end
       end
     end
