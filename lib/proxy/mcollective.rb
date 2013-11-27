@@ -24,7 +24,7 @@ module Proxy
     end
 
     def task_status_callback(status, result)
-      rest_client["command_statuses/#{jid}"].put({:command_status => {:status => status, :result => result}}.to_json, :content_type => 'application/json', :accept => 'application/json;version=2')
+      # rest_client["command_statuses/#{jid}"].put({:command_status => {:status => status, :result => result}}.to_json, :content_type => 'application/json', :accept => 'application/json;version=2')
     end
   end
 
@@ -102,6 +102,20 @@ module Proxy
 
         on_perform do |client, payload|
           client.agent_inventory()
+        end
+      end
+
+      class Fields < ::Proxy::BaseAsyncWorker
+        def initialize(agent)
+          @agent = agent
+        end
+
+        def client
+          super(@agent)
+        end
+
+        on_perform do |client, payload|
+          client.self()
         end
       end
     end
