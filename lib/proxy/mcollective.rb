@@ -4,7 +4,7 @@
 # to check status: curl -X GET http://localhost:8443/tasks/94b356ad3934a5b6ab0f7caa (use url returned from the previous command)
 #
 
-$LOAD_PATH.unshift *Dir["#{File.dirname(__FILE__)}/../../lib"]
+$LOAD_PATH.unshift Dir["#{File.dirname(__FILE__)}/../../lib"]
 
 require "proxy/settings"
 require 'mcollective'
@@ -17,7 +17,7 @@ module Proxy
     SETTINGS = Settings.load_from_file(Pathname.new(__FILE__).join("..", "..", "..", "config", "settings.yml"))
 
     CONNECT_PARAMS = {:timeout => 60, :open_timeout => 10}
-    CONNECT_PARAMS.merge!(:user => SETTINGS.mco_user, :password => SETTINGS.mco_password) if SETTINGS.mco_user && SETTINGS.mco_password
+    CONNECT_PARAMS.merge!(:user => SETTINGS.mcollective_user, :password => SETTINGS.mcollective_password) if SETTINGS.mco_user && SETTINGS.mco_password
 
     def rest_client
       ::RestClient::Resource.new(SETTINGS.mcollective_callback_url, CONNECT_PARAMS)
@@ -111,16 +111,12 @@ module Proxy
       end
 
       class Fields < ::Proxy::BaseAsyncWorker
-        def initialize(agent)
-          @agent = agent
-        end
-
         def client
-          super(@agent)
+          super('rpcutil')
         end
 
-        on_perform do |client, payload|
-          client.inspect()
+        on_perform do |client, name|
+          puts client.agent_inventory.inspect
         end
       end
     end
