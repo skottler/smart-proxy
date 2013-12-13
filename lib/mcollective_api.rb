@@ -52,12 +52,12 @@ class SmartProxy
     enqueue_job('Proxy::MCollective::Puppet::RunOnce', [nil, JSON.parse(params[:filters])])
   end
 
-  post "/mcollective/puppet/start" do
-    enqueue_job('Proxy::MCollective::Puppet::Start', [nil, JSON.parse(params[:filters])])
+  post "/mcollective/puppet/enable" do
+    enqueue_job('Proxy::MCollective::Puppet::Enable', [nil, JSON.parse(params[:filters])])
   end
 
-  post "/mcollective/puppet/stop" do
-    enqueue_job('Proxy::MCollective::Puppet::Stop', [nil, JSON.parse(params[:filters])])
+  post "/mcollective/puppet/disable" do
+    enqueue_job('Proxy::MCollective::Puppet::Disable', [nil, JSON.parse(params[:filters])])
   end
 
   get "/mcollective/ping" do

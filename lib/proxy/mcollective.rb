@@ -1,9 +1,3 @@
-#
-# to start sidekiq: sidekiq -r ./lib/proxy/mcollective.rb -C config/sidekiq.yml -L logs/sidekiq.log
-# to kick off an async job: curl -X POST -d {} http://localhost:8443/mcollective/<endpoint>
-# to check status: curl -X GET http://localhost:8443/tasks/94b356ad3934a5b6ab0f7caa (use url returned from the previous command)
-#
-
 $LOAD_PATH.unshift Dir["#{File.dirname(__FILE__)}/../../lib"]
 
 require "proxy/settings"
@@ -24,7 +18,7 @@ module Proxy
     end
 
     def task_status_callback(status, result)
-      # rest_client["command_statuses/#{jid}"].put({:command_status => {:status => status, :result => result}}.to_json, :content_type => 'application/json', :accept => 'application/json;version=2')
+      rest_client["command_statuses/#{jid}"].put({:command_status => {:status => status, :result => result}}.to_json, :content_type => 'application/json', :accept => 'application/json;version=2')
     end
   end
 
@@ -202,7 +196,7 @@ module Proxy
         end
 
         on_perform do |client, notused|
-          client.disabled()
+          client.disable()
         end
       end
     end
