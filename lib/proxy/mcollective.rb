@@ -175,6 +175,38 @@ module Proxy
       end
     end
 
+    module Puppet
+      class RunOnce < ::Proxy::BaseAsyncWorker
+        def client
+          super("puppet")
+        end
+
+        on_perform do |client, notused|
+          client.runonce()
+        end
+      end
+
+      class Enable < ::Proxy::BaseAsyncWorker
+        def client
+          super("puppet")
+        end
+
+        on_perform do |client, notused|
+          client.enable()
+        end
+      end
+
+      class Disable < ::Proxy::BaseAsyncWorker
+        def client
+          super("puppet")
+        end
+
+        on_perform do |client, notused|
+          client.disabled()
+        end
+      end
+    end
+
     module Util
       class Ping < ::Proxy::BaseAsyncWorker
         def client

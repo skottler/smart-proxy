@@ -48,6 +48,18 @@ class SmartProxy
     enqueue_job('Proxy::MCollective::Service::Stop', [params[:name], JSON.parse(params[:filters])])
   end
 
+  post "/mcollective/puppet/runonce" do
+    enqueue_job('Proxy::MCollective::Puppet::RunOnce', [nil, JSON.parse(params[:filters])])
+  end
+
+  post "/mcollective/puppet/start" do
+    enqueue_job('Proxy::MCollective::Puppet::Start', [nil, JSON.parse(params[:filters])])
+  end
+
+  post "/mcollective/puppet/stop" do
+    enqueue_job('Proxy::MCollective::Puppet::Stop', [nil, JSON.parse(params[:filters])])
+  end
+
   get "/mcollective/ping" do
     enqueue_job('Proxy::MCollective::Util::Ping', [nil, JSON.parse(params[:filters])])
   end
