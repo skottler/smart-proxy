@@ -1,6 +1,6 @@
-$LOAD_PATH.unshift Dir["#{File.dirname(__FILE__)}/../../lib"]
+$LOAD_PATH.unshift(*Dir["#{File.dirname(__FILE__)}/../../lib"])
 
-require "proxy/settings"
+require 'proxy/settings'
 require 'mcollective'
 require 'sidekiq'
 require 'connection_pool'
