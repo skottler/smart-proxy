@@ -97,7 +97,7 @@
 
 # set this to the URL of your foreman installation so async alerts can be
 # sent to the web UI.
-:mcollective_callback_url: http://example.com
+:mcollective_callback_url: https://localhost
 
 # Where our proxy log files are stored
 # filename or STDOUT
