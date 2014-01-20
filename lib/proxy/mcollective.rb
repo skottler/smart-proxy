@@ -34,7 +34,8 @@ module Proxy
     # Create a connection pool that's n + 1 where n is the number of workers.
     def pool(name)
       ConnectionPool.new(:size => 25, :timeout => 2) {
-        rpcclient(name) { |c| c.progress = false; c }
+        rpcclient(name, {:flatten => true}) { |c| c.progress = false; c }
+}
       }
     end
 
