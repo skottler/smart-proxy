@@ -106,12 +106,21 @@ module Proxy
       end
 
       class Fields < ::Proxy::BaseAsyncWorker
+        include ::MCollective::DDL
         def client
           super('rpcutil')
         end
 
         on_perform do |client, name|
-          puts client.agent_inventory.inspect
+          client.agent_inventory.each do |host|
+            host[:data][:agents].each do |agent|
+              begin
+                (@agent_discovery_info ||= []) << MCollective::DDL.new(agent[:name])
+              rescue
+                # there's no DDL for the agent
+              end
+            end
+          end
         end
       end
     end
