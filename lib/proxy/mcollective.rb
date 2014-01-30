@@ -35,7 +35,6 @@ module Proxy
     def pool(name)
       ConnectionPool.new(:size => 25, :timeout => 2) {
         rpcclient(name, {:flatten => true}) { |c| c.progress = false; c }
-}
       }
     end
 

@@ -29,7 +29,7 @@ class SmartProxy
   end
 
   post "/mcollective/packages/:name" do
-    enqueue_job('Proxy::MCollective::Package::Install')
+    enqueue_job('Proxy::MCollective::Package::Install', [params[:name], JSON.parse(params[:filters])])
   end
 
   delete "/mcollective/packages/:name" do
