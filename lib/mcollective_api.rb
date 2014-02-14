@@ -4,9 +4,9 @@ class SmartProxy
   end
 
   helpers do
-    def enqueue_job(klass, args=[])
+    def exec_mco_command(clazz, payload, filters=[])
       begin
-        jid = Sidekiq::Client.push('class' => klass, 'args' => args)
+        jid = clazz.new.perform(payload, filters)
         status 202
         content_type :text
         body "/tasks/#{jid}"
@@ -17,50 +17,50 @@ class SmartProxy
   end
 
   post "/mcollective/agents" do
-    enqueue_job('Proxy::MCollective::Agent::List')
+    exec_mco_command(Proxy::MCollective::Agent::List)
   end
 
   post "/mcollective/agents/:name" do
-    enqueue_job('Proxy::MCollective::Agent::Info')
+    exec_mco_command(Proxy::MCollective::Agent::Info)
   end
 
   post "/mcollective/agents/:name/fields" do
-    enqueue_job('Proxy::MCollective::Agent::Fields', [params[:name]])
+    exec_mco_command(Proxy::MCollective::Agent::Fields, params[:name])
   end
 
   post "/mcollective/packages/:name" do
-    enqueue_job('Proxy::MCollective::Package::Install', [params[:name], JSON.parse(params[:filters])])
+    exec_mco_command(Proxy::MCollective::Package::Install, params[:name], JSON.parse(params[:filters]))
   end
 
   delete "/mcollective/packages/:name" do
-    enqueue_job('Proxy::MCollective::Package::Uninstall', [params[:name], JSON.parse(params[:filters])])
+    exec_mco_command(Proxy::MCollective::Package::Uninstall, params[:name], JSON.parse(params[:filters]))
   end
 
   get "/mcollective/services/:name" do
-    enqueue_job('Proxy::MCollective::Service::Status', [params[:name], JSON.parse(params[:filters])])
+    exec_mco_command(Proxy::MCollective::Service::Status, params[:name], JSON.parse(params[:filters]))
   end
 
   post "/mcollective/services/:name/start" do
-    enqueue_job('Proxy::MCollective::Service::Start', [params[:name], JSON.parse(params[:filters])])
+    exec_mco_command(Proxy::MCollective::Service::Start, params[:name], JSON.parse(params[:filters]))
   end
 
   post "/mcollective/services/:name/stop" do
-    enqueue_job('Proxy::MCollective::Service::Stop', [params[:name], JSON.parse(params[:filters])])
+    exec_mco_command(Proxy::MCollective::Service::Stop, params[:name], JSON.parse(params[:filters]))
   end
 
   post "/mcollective/puppet/runonce" do
-    enqueue_job('Proxy::MCollective::Puppet::RunOnce', [nil, JSON.parse(params[:filters])])
+    exec_mco_command(Proxy::MCollective::Puppet::RunOnce, nil, JSON.parse(params[:filters]))
   end
 
   post "/mcollective/puppet/enable" do
-    enqueue_job('Proxy::MCollective::Puppet::Enable', [nil, JSON.parse(params[:filters])])
+    exec_mco_command(Proxy::MCollective::Puppet::Enable, nil, JSON.parse(params[:filters]))
   end
 
   post "/mcollective/puppet/disable" do
-    enqueue_job('Proxy::MCollective::Puppet::Disable', [nil, JSON.parse(params[:filters])])
+    exec_mco_command(Proxy::MCollective::Puppet::Disable, nil, JSON.parse(params[:filters]))
   end
 
   get "/mcollective/ping" do
-    enqueue_job('Proxy::MCollective::Util::Ping', [nil, JSON.parse(params[:filters])])
+    exec_mco_command(Proxy::MCollective::Util::Ping, nil, JSON.parse(params[:filters]))
   end
 end

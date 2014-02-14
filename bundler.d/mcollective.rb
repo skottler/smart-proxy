@@ -1,4 +1,4 @@
 group :mcollective do
-  gem "sidekiq"
+  gem 'qpid_messaging'
   gem "mcollective-client"
 end
